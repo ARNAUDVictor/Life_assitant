@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Tâches</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Gestionnaire de Tâches</h1>
+        
+        <!-- Formulaire pour ajouter une tâche -->
+        <div class="add-task">
+            <form method="POST" action="/add_task">
+                <input type="text" name="title" placeholder="Nouvelle tâche..." required>
+                <button type="submit">Ajouter</button>
+            </form>
+        </div>
+
+        <!-- Tâches en cours -->
+        <div class="tasks-section">
+            <h2>En cours <span class="task-count">({{ tasks|selectattr('completed', 'equalto', false)|list|length }})</span></h2>
+            {% set active_tasks = tasks|selectattr('completed', 'equalto', false)|list %}
+            {% if active_tasks %}
+                {% for task in active_tasks %}
+                <div class="task">
+                    <span>{{ task.title }}</span>
+                    <div class="task-actions">
+                        <a href="/mark_task_complete/{{ tasks.index(task) }}" class="btn-toggle" title="Marquer comme terminée">✓</a>
+                        <a href="/delete_task/{{ tasks.index(task) }}" class="btn-delete" title="Supprimer">✕</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty">Aucune tâche en cours. Profitez-en ! 🎉</p>
+            {% endif %}
+        </div>
+
+        <!-- Tâches terminées -->
+        <div class="completed-section">
+            <h2 class="completed-header">Terminées <span class="task-count">({{ tasks|selectattr('completed', 'equalto', true)|list|length }})</span></h2>
+            {% set completed_tasks = tasks|selectattr('completed', 'equalto', true)|list %}
+            {% if completed_tasks %}
+                {% for task in completed_tasks %}
+                <div class="task completed">
+                    <span>{{ task.title }}</span>
+                    <div class="task-actions">
+                        <a href="/mark_task_complete/{{ tasks.index(task) }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
+                        <a href="/delete_task/{{ tasks.index(task) }}" class="btn-delete" title="Supprimer">✕</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty">Aucune tâche terminée pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
