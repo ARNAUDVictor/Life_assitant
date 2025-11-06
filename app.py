@@ -1,7 +1,5 @@
-import json
 from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import update
 
 app = Flask(__name__)
 
@@ -28,15 +26,17 @@ class Task(db.Model):
 # Home page - display tasks
 @app.route('/')
 def home():
-    task_list = get_tasks()
+    task_list = Task.query.all()
+
     return render_template('index.html', tasks=task_list)
 
 
 # Add a new task
 @app.route("/add_task", methods=['POST'])
 def add_task():
-    task = Task(title = request.form.get('title'))
-    save_tasks(task)
+    task = Task(title=request.form.get('title'))
+    db.session.add(task)
+    db.session.commit()
 
     return redirect(url_for("home"))
 
@@ -44,12 +44,13 @@ def add_task():
 # Mark a task as complete
 @app.route("/mark_task_complete/<int:task_id>")
 def mark_task_complete(task_id):
-    print("task_index :", task_id)
     task = Task.query.get(task_id)
     if task:
         task.completed = not task.completed
         db.session.commit()
+
     return redirect(url_for("home"))
+
 
 # Delete a task
 @app.route("/delete_task/<int:task_id>")
@@ -58,17 +59,12 @@ def delete_task(task_id):
     if task:
         db.session.delete(task)
         db.session.commit()
+
     return redirect(url_for("home"))
 
 ################Helper Functions####################
-#get tasks from json file
-def get_tasks():
-    return Task.query.all()
 
-#save tasks to json file
-def save_tasks(task):
-    db.session.add(task)
-    db.session.commit()
+
 
 ########################Run the app########################
 if __name__ == '__main__':
