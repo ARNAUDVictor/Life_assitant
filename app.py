@@ -30,16 +30,15 @@ def home():
     task_list = get_tasks()
     return render_template('index.html', tasks=task_list)
 
+
 # Add a new task
 @app.route("/add_task", methods=['POST'])
 def add_task():
-    task = {"title" : request.form.get('title'),
-            "completed": False}
-    tasks_list = get_tasks() 
-    tasks_list.append(task) 
-    save_tasks(tasks_list)
+    task = Task(title = request.form.get('title'))
+    save_tasks(task)
 
     return redirect(url_for("home"))
+
 
 # Mark a task as complete
 @app.route("/mark_task_complete/<int:task_index>")
@@ -63,17 +62,12 @@ def delete_task(task_index):
 ################Helper Functions####################
 #get tasks from json file
 def get_tasks():
-    try:
-        with open('data/tasks.json', 'r') as f:
-            tasks_list = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        tasks_list = []
-    return tasks_list
+    return Task.query.all()
 
 #save tasks to json file
-def save_tasks(tasks_list):
-    with open('data/tasks.json', 'w') as f:
-        json.dump(tasks_list, f)
+def save_tasks(task):
+    db.session.add(task)
+    db.session.commit()
 
 ########################Run the app########################
 if __name__ == '__main__':
