@@ -1,6 +1,7 @@
 import json
 from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import update
 
 app = Flask(__name__)
 
@@ -41,22 +42,22 @@ def add_task():
 
 
 # Mark a task as complete
-@app.route("/mark_task_complete/<int:task_index>")
-def mark_task_complete(task_index):
-    print("Marking task as complete:", task_index)
-    task_list = get_tasks()
-    if 0 <= task_index < len(task_list):
-        task_list[task_index]['completed'] = not task_list[task_index]['completed']
-        save_tasks(task_list)
+@app.route("/mark_task_complete/<int:task_id>")
+def mark_task_complete(task_id):
+    print("task_index :", task_id)
+    task = Task.query.get(task_id)
+    if task:
+        task.completed = not task.completed
+        db.session.commit()
     return redirect(url_for("home"))
 
 # Delete a task
-@app.route("/delete_task/<int:task_index>")
-def delete_task(task_index):
-    task_list = get_tasks()
-    if 0 <= task_index < len(task_list):
-        task_list.pop(task_index)
-        save_tasks(task_list)
+@app.route("/delete_task/<int:task_id>")
+def delete_task(task_id):
+    task = Task.query.get(task_id)
+    if task:
+        db.session.delete(task)
+        db.session.commit()
     return redirect(url_for("home"))
 
 ################Helper Functions####################

@@ -27,8 +27,8 @@
                 <div class="task">
                     <span>{{ task.title }}</span>
                     <div class="task-actions">
-                        <a href="/mark_task_complete/{{ tasks.index(task) }}" class="btn-toggle" title="Marquer comme terminée">✓</a>
-                        <a href="/delete_task/{{ tasks.index(task) }}" class="btn-delete" title="Supprimer">✕</a>
+                        <a href="/mark_task_complete/{{ task.id }}" class="btn-toggle" title="Marquer comme terminée">✓</a>
+                        <a href="/delete_task/{{ task.id }}" class="btn-delete" title="Supprimer">✕</a>
                     </div>
                 </div>
                 {% endfor %}
@@ -46,8 +46,8 @@
                 <div class="task completed">
                     <span>{{ task.title }}</span>
                     <div class="task-actions">
-                        <a href="/mark_task_complete/{{ tasks.index(task) }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
-                        <a href="/delete_task/{{ tasks.index(task) }}" class="btn-delete" title="Supprimer">✕</a>
+                        <a href="/mark_task_complete/{{ task.id }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
+                        <a href="/delete_task/{{ task.id }}" class="btn-delete" title="Supprimer">✕</a>
                     </div>
                 </div>
                 {% endfor %}
