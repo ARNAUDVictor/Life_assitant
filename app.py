@@ -5,9 +5,7 @@ app = Flask(__name__)
 
 ###############Database Configuration####################
 
-# SQLite configuration
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tasks.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 
 # Initialize the database
 db = SQLAlchemy(app)
