@@ -183,3 +183,18 @@ h2.completed-header::before {
     font-weight: normal;
     margin-left: 5px;
 }
+
+.task-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.task-title {
+    font-weight: 500;
+}
+
+.task-date {
+    color: #666;
+    font-size: 0.85em;
+}

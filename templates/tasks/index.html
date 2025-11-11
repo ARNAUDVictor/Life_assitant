@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'components/task_card.html' import task_card %}
 
 {% block title %}Gestionnaire de Tâches{% endblock %}
 
@@ -12,7 +13,7 @@
         
         <!-- Formulaire pour ajouter une tâche -->
         <div class="add-task">
-            <form method="POST" action="{{ url_for("tasks.add_task") }}">
+            <form method="POST" action="{{ url_for('tasks.add_task') }}">
                 <input type="text" name="title" placeholder="Nouvelle tâche..." required>
                 <button type="submit">Ajouter</button>
             </form>
@@ -24,13 +25,7 @@
             {% set active_tasks = tasks|selectattr('completed', 'equalto', false)|list %}
             {% if active_tasks %}
                 {% for task in active_tasks %}
-                <div class="task">
-                    <span>{{ task.title }}</span>
-                    <div class="task-actions">
-                        <a href="{{ url_for("tasks.mark_task_complete", task_id=task.id) }}" class="btn-toggle" title="Marquer comme terminée">✓</a>
-                        <a href="{{ url_for("tasks.delete_task", task_id=task.id) }}" class="btn-delete" title="Supprimer">✕</a>
-                    </div>
-                </div>
+                    {{ task_card(task) }}
                 {% endfor %}
             {% else %}
                 <p class="empty">Aucune tâche en cours. Profitez-en ! 🎉</p>
@@ -43,13 +38,7 @@
             {% set completed_tasks = tasks|selectattr('completed', 'equalto', true)|list %}
             {% if completed_tasks %}
                 {% for task in completed_tasks %}
-                <div class="task completed">
-                    <span>{{ task.title }}</span>
-                    <div class="task-actions">
-                        <a href="{{ url_for("tasks.mark_task_complete", task_id=task.id) }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
-                        <a href="{{ url_for("tasks.delete_task", task_id=task.id) }}" class="btn-delete" title="Supprimer">✕</a>
-                    </div>
-                </div>
+                    {{ task_card(task) }}
                 {% endfor %}
             {% else %}
                 <p class="empty">Aucune tâche terminée pour le moment.</p>

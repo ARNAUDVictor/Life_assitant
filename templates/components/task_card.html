@@ -1,0 +1,16 @@
+{% macro task_card(task) %}
+    <div class="task {% if task.completed %}completed{% endif %}">
+        <div class="task-info">
+            <span class="task-title">{{ task.title }}</span>
+            <small class="task-date">Créée le : {{ task.created_at.strftime('%d/%m/%Y à %H:%M') }}</small>
+        </div>
+        <div class="task-actions">
+            {% if task.completed %}
+                <a href="{{ url_for('tasks.mark_task_complete', task_id=task.id) }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
+            {% else %}
+                <a href="{{ url_for('tasks.mark_task_complete', task_id=task.id) }}" class="btn-toggle" title="Marquer comme terminée">✓</a>
+            {% endif %}
+            <a href="{{ url_for('tasks.delete_task', task_id=task.id) }}" class="btn-delete" title="Supprimer">✕</a>
+        </div>
+    </div>
+{% endmacro %}
