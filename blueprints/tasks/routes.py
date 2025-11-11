@@ -14,9 +14,11 @@ def home():
 # Add a new task
 @tasks_bp.route("/add_task", methods=['POST'])
 def add_task():
-    task = Task(title=request.form.get('title'))
-    db.session.add(task)
-    db.session.commit()
+    task_title = request.form.get('title', "").strip()
+    if task_title and len(task_title) < 200:
+        task = Task(title=task_title)
+        db.session.add(task)
+        db.session.commit()
 
     return redirect(url_for("tasks.home"))
 
