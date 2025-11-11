@@ -8,7 +8,7 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 @tasks_bp.route('/')
 def home():
     task_list = Task.query.all()
-    return render_template('templates/tasks/index.html', tasks=task_list)
+    return render_template('tasks/index.html', tasks=task_list)
 
 
 # Add a new task
