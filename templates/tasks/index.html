@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from 'components/task_card.html' import task_card %}
 
-{% block title %}Gestionnaire de Tâches{% endblock %}
+{% block title %}Gestionnaire de Tâches | ({{ tasks|length }}){% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
