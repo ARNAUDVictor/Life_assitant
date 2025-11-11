@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import Task, db
 
@@ -15,11 +16,17 @@ def home():
 @tasks_bp.route("/add_task", methods=['POST'])
 def add_task():
     task_title = request.form.get('title', "").strip()
+    due_date_str = request.form.get('due_date', "")
+
     if not task_title or len(task_title) > 200:
         flash("Le titre d'une tache ne peut etre vide ou plus long que 200 caractères", "error")
         return redirect(url_for("tasks.home"))
     
-    task = Task(title=task_title)
+    due_date = None
+    if due_date_str:
+        due_date = datetime.fromisoformat(due_date_str)
+
+    task = Task(title=task_title, due_date=due_date)
     db.session.add(task)
     db.session.commit()
     flash("Tache ajouté avec succès !", "success")
