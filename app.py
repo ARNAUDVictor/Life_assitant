@@ -1,7 +1,7 @@
 from flask import Flask
 from models import db
 from config import Config
-from blueprints.tasks.routes import tasks_blueprint
+from blueprints.tasks import tasks_bp
 
 #app creation
 app = Flask(__name__)
@@ -12,7 +12,8 @@ app.config.from_object(Config)
 # Initialize the database
 db.init_app(app)
 
-app.register_blueprint(tasks_blueprint, url_prefix='/tasks')
+# Register blueprints
+app.register_blueprint(tasks_bp)
 
 
 ########################Run the app########################
