@@ -14,9 +14,17 @@
         <!-- Formulaire pour ajouter une tâche -->
         <div class="add-task">
             <form method="POST" action="{{ url_for('tasks.add_task') }}">
-                <input type="text" name="title" placeholder="Nouvelle tâche..." required>
-                <input type="datetime-local" name="due_date">
-                <button type="submit">Ajouter</button>
+            <div class="form-row">
+                <input type="text" name="title" placeholder="Nouvelle tâche..." required class="task-input">
+                <select name="category_id" class="category-select">
+                <option value="">📁 Catégorie</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+                </select>
+                <input type="datetime-local" name="due_date" class="date-input">
+                <button type="submit" class="btn-add">Ajouter</button>
+            </div>
             </form>
         </div>
 

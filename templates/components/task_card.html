@@ -10,6 +10,9 @@
                         {% if task.is_overdue() %}<span class="overdue-badge">En retard !</span>{% endif %}
                 </small>
             {% endif %}
+            {% if task.category %}
+                <span class="task-category" style="background-color: {{ task.category.color }}">{{ task.category.name }}</span>
+            {% endif %}
         </div>
     </div>
     <div class="task-actions">

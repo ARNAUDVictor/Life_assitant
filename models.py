@@ -1,7 +1,18 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
+
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), nullable=False)
+    color = db.Column(db.String(7), default="#667eea")
+
+    def __repr__(self):
+        return f"<Category {self.name}>"
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -9,6 +20,8 @@ class Task(db.Model):
     completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
     due_date = db.Column(db.DateTime, nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
+    category = db.relationship("Category", backref="tasks")
 
     def __repr__(self):
         return f'<Task {self.title}>'

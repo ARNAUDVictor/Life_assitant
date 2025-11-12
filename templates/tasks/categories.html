@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion des Catégories{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>🏷️ Gestion des Catégories</h1>
+        
+        <!-- Formulaire d'ajout -->
+        <div class="add-category">
+            <form method="POST" action="{{ url_for('tasks.add_category') }}">
+                <div class="category-form-row">
+                    <input type="text" name="name" placeholder="Nom de la catégorie..." required maxlength="20" class="category-input">
+                    <input type="color" name="color" value="#667eea" class="color-picker">
+                    <button type="submit" class="btn-add">Ajouter</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Liste des catégories -->
+        <div class="categories-list">
+            <h2>Catégories existantes <span class="task-count">({{ categories|length }})</span></h2>
+            {% if categories %}
+                <div class="categories-grid">
+                    {% for cat in categories %}
+                    <div class="category-card">
+                        <div class="category-preview" style="background-color: {{ cat.color }}">
+                            <span class="category-name">{{ cat.name }}</span>
+                            <span class="category-task-count">{{ cat.tasks|length }} tâche(s)</span>
+                        </div>
+                        <a href="{{ url_for('tasks.delete_category', category_id=cat.id) }}" 
+                           class="btn-delete-cat" 
+                           onclick="return confirm('Supprimer {{ cat.name }} ?')">
+                            🗑️
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty">Aucune catégorie. Ajoutez-en une !</p>
+            {% endif %}
+        </div>
+
+        <div class="back-link">
+            <a href="{{ url_for('tasks.home') }}">← Retour aux tâches</a>
+        </div>
+    </div>
+{% endblock %}
