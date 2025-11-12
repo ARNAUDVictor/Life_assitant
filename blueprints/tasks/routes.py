@@ -20,8 +20,10 @@ def add_task():
     due_date_str = request.form.get('due_date', "")
     category_id = request.form.get("category_id", "")
 
-    if not task_title or len(task_title) > 200:
-        flash("Le titre d'une tache ne peut etre vide ou plus long que 200 caractères", "error")
+    errors = Task.validate_input(task_title, due_date_str)
+    if errors:
+        for error in errors:
+            flash(error, "error")
         return redirect(url_for("tasks.home"))
     
     due_date = None
@@ -61,6 +63,40 @@ def delete_task(task_id):
         flash("Tache supprimée avec succès !", "success")
 
     return redirect(url_for("tasks.home"))
+
+
+# Edit a task
+@tasks_bp.route("/edit_task/<int:task_id>", methods=['GET', 'POST'])
+def edit_task(task_id):
+    task = Task.query.get_or_404(task_id)
+
+    if request.method == 'POST':
+        task_title = request.form.get('title', "").strip()
+        due_date_str = request.form.get('due_date', "")
+        category_id = request.form.get("category_id", "")
+        errors = Task.validate_input(task_title, due_date_str)
+
+        if errors:
+            for error in errors:
+                flash(error, "error")
+            return redirect(url_for("tasks.edit_task", task_id=task.id))
+        
+        due_date = None
+        if due_date_str:
+            due_date = datetime.fromisoformat(due_date_str)
+        if category_id:
+            category_id = int(category_id)
+
+        task.title = task_title
+        task.due_date = due_date
+        task.category_id = category_id
+        db.session.commit()
+        flash("Tache mise à jour avec succès !", "success")
+        return redirect(url_for("tasks.home"))
+    
+    # GET : afficher le formulaire
+    categories = Category.query.all()
+    return render_template('tasks/edit.html', task=task, categories=categories, datetime=datetime)
 
 
 # Categories home page

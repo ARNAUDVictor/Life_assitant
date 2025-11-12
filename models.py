@@ -32,4 +32,21 @@ class Task(db.Model):
         if not self.due_date or self.completed:
             return False
         return datetime.now() > self.due_date
+    
+
+    @staticmethod
+    def validate_input(title, due_date_str):
+        errors = []
+        if not title or len(title) > 200:
+            errors.append("Le titre d'une tache ne peut etre vide ou plus long que 200 caractères")
+
+        if due_date_str:
+            try:
+                due_date = datetime.fromisoformat(due_date_str)
+                if due_date < datetime.now():
+                    errors.append("La date d'échéance ne peut pas être dans le passé.")
+            except ValueError:
+                errors.append("Format de date invalide.")
+
+        return errors
         

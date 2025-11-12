@@ -16,6 +16,7 @@
         </div>
     </div>
     <div class="task-actions">
+        <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="btn-edit" title="Modifier">✏️</a>
         {% if task.completed %}
             <a href="{{ url_for('tasks.mark_task_complete', task_id=task.id) }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
         {% else %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier la tâche{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>✏️ Modifier la tâche</h1>
+        
+        <form method="POST" action="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="edit-form">
+            <div class="form-group">
+                <label for="title">Titre de la tâche</label>
+                <input type="text" 
+                       id="title" 
+                       name="title" 
+                       value="{{ task.title }}" 
+                       required 
+                       maxlength="200"
+                       class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="category_id">Catégorie</label>
+                <select id="category_id" name="category_id" class="form-select">
+                    <option value="">Aucune catégorie</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" 
+                                {% if task.category_id == cat.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="due_date">Date limite</label>
+                <input type="datetime-local" 
+                       id="due_date" 
+                       name="due_date" 
+                       value="{% if task.due_date %}{{ task.due_date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                       class="form-input">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">💾 Enregistrer</button>
+                <a href="{{ url_for('tasks.home') }}" class="btn-cancel">Annuler</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
