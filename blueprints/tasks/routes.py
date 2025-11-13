@@ -8,9 +8,17 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 # Home page - display all tasks
 @tasks_bp.route('/')
 def home():
-    task_list = Task.query.all()
+    sort_by = request.args.get('sort_by', 'due_date')
+    categories_filter = request.args.get('category', None)
+
+    if categories_filter:
+        categories_filter = int(categories_filter)
+        task_list = Task.query.filter_by(category_id=categories_filter).order_by(getattr(Task, sort_by).desc()).all()
+    else:
+        task_list = Task.query.order_by(getattr(Task, sort_by).desc()).all()
+
     categories = Category.query.all()
-    return render_template('tasks/index.html', tasks=task_list, categories=categories)
+    return render_template('tasks/index.html', tasks=task_list, categories=categories, datetime=datetime)
 
 
 # Add a new task

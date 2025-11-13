@@ -10,6 +10,33 @@
 {% block content %}
     <div class="container">
         <h1>📝 Gestionnaire de Tâches</h1>
+        <!-- Barre de filtres et tri -->
+        <div class="filters-bar">
+            <form method="GET" action="{{ url_for('tasks.home') }}" class="filters-form">
+                <div class="filter-group">
+                    <label for="category">🏷️ Catégorie</label>
+                    <select name="category" id="category" class="filter-select">
+                        <option value="">Toutes</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if request.args.get('category') == cat.id|string %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sort_by">📊 Trier par</label>
+                    <select name="sort_by" id="sort_by" class="filter-select">
+                        <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>Date de création</option>
+                        <option value="due_date" {% if request.args.get('sort_by') == 'due_date' %}selected{% endif %}>Date d'échéance</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-filter">Appliquer</button>
+                <a href="{{ url_for('tasks.home') }}" class="btn-reset">Réinitialiser</a>
+            </form>
+        </div>
         
         <!-- Formulaire pour ajouter une tâche -->
         <div class="add-task">
