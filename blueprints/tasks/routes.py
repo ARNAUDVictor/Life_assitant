@@ -27,7 +27,7 @@ def home():
 def add_task():
     task_title = request.form.get('title', "").strip()
     due_date_str = request.form.get('due_date', "")
-    category_id = request.form.get("category_id", "")
+    category_id_str = request.form.get("category_id", "")
 
     errors = Task.validate_input(task_title, due_date_str)
     if errors:
@@ -39,8 +39,12 @@ def add_task():
     if due_date_str:
         due_date = datetime.fromisoformat(due_date_str)
 
-    if category_id:
-        category_id = int(category_id)
+    category_id = None
+    if category_id_str:
+        try:
+            category_id = int(category_id_str)
+        except ValueError:
+            category_id = None
 
     task = Task(title=task_title, due_date=due_date, category_id=category_id)
     db.session.add(task)
@@ -82,7 +86,7 @@ def edit_task(task_id):
     if request.method == 'POST':
         task_title = request.form.get('title', "").strip()
         due_date_str = request.form.get('due_date', "")
-        category_id = request.form.get("category_id", "")
+        category_id_str = request.form.get("category_id", "")
         errors = Task.validate_input(task_title, due_date_str)
 
         if errors:
@@ -93,8 +97,13 @@ def edit_task(task_id):
         due_date = None
         if due_date_str:
             due_date = datetime.fromisoformat(due_date_str)
-        if category_id:
-            category_id = int(category_id)
+
+        category_id = None
+        if category_id_str:
+            try:
+                category_id = int(category_id_str)
+            except ValueError:
+                category_id = None
 
         task.title = task_title
         task.due_date = due_date
