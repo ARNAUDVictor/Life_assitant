@@ -2,51 +2,94 @@
 
 {% block title %}Gestion des Catégories{% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
-{% endblock %}
-
 {% block content %}
-    <div class="container">
-        <h1>🏷️ Gestion des Catégories</h1>
-        
-        <!-- Formulaire d'ajout -->
-        <div class="add-category">
-            <form method="POST" action="{{ url_for('tasks.add_category') }}">
-                <div class="category-form-row">
-                    <input type="text" name="name" placeholder="Nom de la catégorie..." required maxlength="20" class="category-input">
-                    <input type="color" name="color" value="#667eea" class="color-picker">
-                    <button type="submit" class="btn-add">Ajouter</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Liste des catégories -->
-        <div class="categories-list">
-            <h2>Catégories existantes <span class="task-count">({{ categories|length }})</span></h2>
-            {% if categories %}
-                <div class="categories-grid">
-                    {% for cat in categories %}
-                    <div class="category-card">
-                        <div class="category-preview" style="background-color: {{ cat.color }}">
-                            <span class="category-name">{{ cat.name }}</span>
-                            <span class="category-task-count">{{ cat.tasks|length }} tâche(s)</span>
-                        </div>
-                        <a href="{{ url_for('tasks.delete_category', category_id=cat.id) }}" 
-                           class="btn-delete-cat" 
-                           onclick="return confirm('Supprimer {{ cat.name }} ?')">
-                            🗑️
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="empty">Aucune catégorie. Ajoutez-en une !</p>
-            {% endif %}
-        </div>
-
-        <div class="back-link">
-            <a href="{{ url_for('tasks.home') }}">← Retour aux tâches</a>
-        </div>
+<div class="space-y-8">
+    <!-- En-tête -->
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-white mb-2">
+            <i class="fas fa-tags mr-2"></i>
+            Gestion des Catégories
+        </h1>
+        <p class="text-white opacity-90">Organisez vos tâches par catégories</p>
     </div>
+
+    <!-- Formulaire d'ajout -->
+    <div class="bg-white rounded-xl shadow-xl p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-plus-circle text-primary mr-2"></i>
+            Nouvelle catégorie
+        </h2>
+        <form method="POST" action="{{ url_for('tasks.add_category') }}" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" 
+                       name="name" 
+                       placeholder="Nom de la catégorie..." 
+                       required 
+                       maxlength="20"
+                       class="md:col-span-2 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                
+                <div class="flex items-center space-x-3">
+                    <label class="text-sm font-medium text-gray-700">Couleur :</label>
+                    <input type="color" 
+                           name="color" 
+                           value="#667eea"
+                           class="w-20 h-12 rounded-lg border-2 border-gray-300 cursor-pointer">
+                </div>
+            </div>
+            
+            <button type="submit" 
+                    class="w-full md:w-auto px-8 py-3 bg-primary hover:bg-secondary text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
+                <i class="fas fa-plus mr-2"></i>Ajouter la catégorie
+            </button>
+        </form>
+    </div>
+
+    <!-- Liste des catégories -->
+    <div class="bg-white rounded-xl shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <div class="w-1 h-8 bg-primary rounded mr-3"></div>
+            <span>Catégories existantes</span>
+            <span class="ml-3 text-sm font-normal text-gray-500">({{ categories|length }})</span>
+        </h2>
+        
+        {% if categories %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for cat in categories %}
+                    <div class="relative group">
+                        <div class="rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
+                             style="background: linear-gradient(135deg, {{ cat.color }} 0%, {{ cat.color }}dd 100%);">
+                            <div class="p-6 text-white">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ cat.name }}</h3>
+                                    <a href="{{ url_for('tasks.delete_category', category_id=cat.id) }}"
+                                       onclick="return confirm('Supprimer {{ cat.name }} ?')"
+                                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 transition">
+                                        <i class="fas fa-trash text-white"></i>
+                                    </a>
+                                </div>
+                                <div class="flex items-center space-x-2 text-sm opacity-90">
+                                    <i class="fas fa-tasks"></i>
+                                    <span>{{ cat.tasks|length }} tâche(s)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12 bg-gray-50 rounded-lg">
+                <i class="fas fa-tags text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 text-lg">Aucune catégorie. Ajoutez-en une !</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Lien retour -->
+    <div class="text-center">
+        <a href="{{ url_for('tasks.home') }}" class="inline-flex items-center space-x-2 text-white hover:underline text-lg font-medium">
+            <i class="fas fa-arrow-left"></i>
+            <span>Retour aux tâches</span>
+        </a>
+    </div>
+</div>
 {% endblock %}

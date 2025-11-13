@@ -1,84 +1,140 @@
 {% extends "base.html" %}
 {% from 'components/task_card.html' import task_card %}
 
-{% block title %}Gestionnaire de Tâches | ({{ tasks|length }}){% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
-{% endblock %}
+{% block title %}Gestionnaire de Tâches ({{ tasks|length }}){% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>📝 Gestionnaire de Tâches</h1>
-        <!-- Barre de filtres et tri -->
-        <div class="filters-bar">
-            <form method="GET" action="{{ url_for('tasks.home') }}" class="filters-form">
-                <div class="filter-group">
-                    <label for="category">🏷️ Catégorie</label>
-                    <select name="category" id="category" class="filter-select">
-                        <option value="">Toutes</option>
-                        {% for cat in categories %}
-                            <option value="{{ cat.id }}" {% if request.args.get('category') == cat.id|string %}selected{% endif %}>
-                                {{ cat.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
+<div class="space-y-8">
+    <!-- En-tête -->
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-white mb-2">
+            <i class="fas fa-tasks mr-2"></i>
+            Gestionnaire de Tâches
+        </h1>
+        <p class="text-white opacity-90">Organisez votre quotidien efficacement</p>
+    </div>
 
-                <div class="filter-group">
-                    <label for="sort_by">📊 Trier par</label>
-                    <select name="sort_by" id="sort_by" class="filter-select">
-                        <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>Date de création</option>
-                        <option value="due_date" {% if request.args.get('sort_by') == 'due_date' %}selected{% endif %}>Date d'échéance</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-filter">Appliquer</button>
-                <a href="{{ url_for('tasks.home') }}" class="btn-reset">Réinitialiser</a>
-            </form>
-        </div>
-        
-        <!-- Formulaire pour ajouter une tâche -->
-        <div class="add-task">
-            <form method="POST" action="{{ url_for('tasks.add_task') }}">
-            <div class="form-row">
-                <input type="text" name="title" placeholder="Nouvelle tâche..." required class="task-input">
-                <select name="category_id" class="category-select">
-                <option value="">📁 Catégorie</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.id }}">{{ cat.name }}</option>
-                {% endfor %}
+    <!-- Formulaire d'ajout -->
+    <div class="bg-white rounded-xl shadow-xl p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-plus-circle text-primary mr-2"></i>
+            Nouvelle tâche
+        </h2>
+        <form method="POST" action="{{ url_for('tasks.add_task') }}" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input type="text" 
+                       name="title" 
+                       placeholder="Titre de la tâche..." 
+                       required 
+                       maxlength="200"
+                       class="md:col-span-2 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                
+                <select name="category_id" class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                    <option value="">📁 Sans catégorie</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
                 </select>
-                <input type="datetime-local" name="due_date" class="date-input">
-                <button type="submit" class="btn-add">Ajouter</button>
+                
+                <input type="datetime-local" 
+                       name="due_date"
+                       class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
             </div>
-            </form>
-        </div>
+            
+            <button type="submit" 
+                    class="w-full md:w-auto px-8 py-3 bg-primary hover:bg-secondary text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
+                <i class="fas fa-plus mr-2"></i>Ajouter la tâche
+            </button>
+        </form>
+    </div>
 
-        <!-- Tâches en cours -->
-        <div class="tasks-section">
-            <h2>En cours <span class="task-count">({{ tasks|selectattr('completed', 'equalto', false)|list|length }})</span></h2>
-            {% set active_tasks = tasks|selectattr('completed', 'equalto', false)|list %}
-            {% if active_tasks %}
+    <!-- Barre de filtres -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-filter text-primary mr-2"></i>
+            Filtres et tri
+        </h2>
+        <form method="GET" action="{{ url_for('tasks.home') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-tags mr-1"></i>Catégorie
+                </label>
+                <select name="category" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                    <option value="">Toutes les catégories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if request.args.get('category') == cat.id|string %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-sort mr-1"></i>Trier par
+                </label>
+                <select name="sort_by" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                    <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>Date de création</option>
+                    <option value="due_date" {% if request.args.get('sort_by') == 'due_date' %}selected{% endif %}>Date d'échéance</option>
+                    <option value="title" {% if request.args.get('sort_by') == 'title' %}selected{% endif %}>Titre (A-Z)</option>
+                </select>
+            </div>
+            
+            <div class="flex items-end space-x-2">
+                <button type="submit" class="flex-1 px-6 py-2 bg-primary hover:bg-secondary text-white font-medium rounded-lg transition shadow hover:shadow-lg">
+                    <i class="fas fa-check mr-2"></i>Appliquer
+                </button>
+                <a href="{{ url_for('tasks.home') }}" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition">
+                    <i class="fas fa-redo mr-2"></i>Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tâches en cours -->
+    <div class="bg-white rounded-xl shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <div class="w-1 h-8 bg-primary rounded mr-3"></div>
+            <span>En cours</span>
+            <span class="ml-3 text-sm font-normal text-gray-500">({{ tasks|selectattr('completed', 'equalto', false)|list|length }})</span>
+        </h2>
+        
+        {% set active_tasks = tasks|selectattr('completed', 'equalto', false)|list %}
+        {% if active_tasks %}
+            <div class="space-y-4">
                 {% for task in active_tasks %}
                     {{ task_card(task) }}
                 {% endfor %}
-            {% else %}
-                <p class="empty">Aucune tâche en cours. Profitez-en ! 🎉</p>
-            {% endif %}
-        </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12 bg-gray-50 rounded-lg">
+                <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
+                <p class="text-gray-600 text-lg">Aucune tâche en cours. Profitez-en ! 🎉</p>
+            </div>
+        {% endif %}
+    </div>
 
-        <!-- Tâches terminées -->
-        <div class="completed-section">
-            <h2 class="completed-header">Terminées <span class="task-count">({{ tasks|selectattr('completed', 'equalto', true)|list|length }})</span></h2>
-            {% set completed_tasks = tasks|selectattr('completed', 'equalto', true)|list %}
-            {% if completed_tasks %}
+    <!-- Tâches terminées -->
+    <div class="bg-white rounded-xl shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <div class="w-1 h-8 bg-green-500 rounded mr-3"></div>
+            <span>Terminées</span>
+            <span class="ml-3 text-sm font-normal text-gray-500">({{ tasks|selectattr('completed', 'equalto', true)|list|length }})</span>
+        </h2>
+        
+        {% set completed_tasks = tasks|selectattr('completed', 'equalto', true)|list %}
+        {% if completed_tasks %}
+            <div class="space-y-4">
                 {% for task in completed_tasks %}
                     {{ task_card(task) }}
                 {% endfor %}
-            {% else %}
-                <p class="empty">Aucune tâche terminée pour le moment.</p>
-            {% endif %}
-        </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12 bg-gray-50 rounded-lg">
+                <i class="fas fa-clipboard-list text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 text-lg">Aucune tâche terminée pour le moment.</p>
+            </div>
+        {% endif %}
     </div>
+</div>
 {% endblock %}

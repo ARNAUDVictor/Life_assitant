@@ -3,26 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Life assistant{% endblock %}</title>
+    <title>{% block title %}Mon Application{% endblock %}</title>
     
-    <!-- CSS global -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- CSS spécifique à chaque page -->
+    <!-- Configuration Tailwind personnalisée -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Icônes (optionnel) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="bg-gradient-to-br from-primary to-secondary min-h-screen">
     <!-- Navigation -->
     {% include 'components/navbar.html' %}
-
+    
     <!-- Messages flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="flash-messages">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
                 {% for category, message in messages %}
-                    <div class="flash flash-{{ category }}">
-                        {{ message }}
-                        <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                    <div class="{% if category == 'success' %}bg-green-100 border-green-400 text-green-700
+                                {% elif category == 'error' %}bg-red-100 border-red-400 text-red-700
+                                {% elif category == 'warning' %}bg-yellow-100 border-yellow-400 text-yellow-700
+                                {% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %}
+                                border-l-4 p-4 rounded-r-lg shadow-md mb-4 flex justify-between items-center animate-slide-in">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="text-2xl leading-none hover:opacity-75">&times;</button>
                     </div>
                 {% endfor %}
             </div>
@@ -30,12 +50,21 @@
     {% endwith %}
     
     <!-- Contenu principal -->
-    <main class="main-content">
-        {% block content %}
-        {% endblock %}
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
     </main>
     
-    <!-- Scripts JavaScript optionnels -->
+    <!-- Scripts optionnels -->
     {% block extra_js %}{% endblock %}
+    
+    <style>
+        @keyframes slide-in {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+    </style>
 </body>
 </html>

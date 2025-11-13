@@ -13,6 +13,7 @@ def home():
 
     if categories_filter:
         categories_filter = int(categories_filter)
+        
         task_list = Task.query.filter_by(category_id=categories_filter).order_by(getattr(Task, sort_by).desc()).all()
     else:
         task_list = Task.query.order_by(getattr(Task, sort_by).desc()).all()

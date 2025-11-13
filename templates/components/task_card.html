@@ -1,28 +1,63 @@
 {% macro task_card(task) %}
-<div class="task {% if task.completed %}completed{% endif %}">
-    <div class="task-info">
-        <span class="task-title">{{ task.title }}</span>
-        <div class="task-meta">
-            <small class="task-date">Créée le : {{ task.created_at.strftime('%d/%m/%Y à %H:%M') }}</small>
-           {% if task.due_date %}
-                <small class="task-due {% if task.is_overdue() %}overdue{% endif %}">
-                    📅 Échéance : {{ task.due_date.strftime('%d/%m/%Y à %H:%M') }}
-                        {% if task.is_overdue() %}<span class="overdue-badge">En retard !</span>{% endif %}
-                </small>
-            {% endif %}
-            {% if task.category %}
-                <span class="task-category" style="background-color: {{ task.category.color }}">{{ task.category.name }}</span>
-            {% endif %}
+<div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-4 border-l-4 
+            {% if task.completed %}border-green-500 opacity-75{% else %}border-primary{% endif %}
+            transform hover:-translate-y-1">
+    <div class="flex items-start justify-between">
+        <!-- Info tâche -->
+        <div class="flex-1 space-y-2">
+            <div class="flex items-center space-x-3">
+                <h3 class="text-lg font-semibold {% if task.completed %}line-through text-gray-500{% else %}text-gray-800{% endif %}">
+                    {{ task.title }}
+                </h3>
+                {% if task.category %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm"
+                          style="background-color: {{ task.category.color }}">
+                        {{ task.category.name }}
+                    </span>
+                {% endif %}
+            </div>
+            
+            <div class="flex flex-col space-y-1 text-sm text-gray-600">
+                <span class="flex items-center space-x-1">
+                    <i class="far fa-clock text-gray-400"></i>
+                    <span>Créée le {{ task.created_at.strftime('%d/%m/%Y à %H:%M') }}</span>
+                </span>
+                
+                {% if task.due_date %}
+                    <span class="flex items-center space-x-1 {% if task.is_overdue() %}text-red-600 font-semibold{% endif %}">
+                        <i class="far fa-calendar-alt {% if task.is_overdue() %}text-red-600{% else %}text-gray-400{% endif %}"></i>
+                        <span>Échéance : {{ task.due_date.strftime('%d/%m/%Y à %H:%M') }}</span>
+                        {% if task.is_overdue() %}
+                            <span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs ml-2">En retard !</span>
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </div>
         </div>
-    </div>
-    <div class="task-actions">
-        <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="btn-edit" title="Modifier">✏️</a>
-        {% if task.completed %}
-            <a href="{{ url_for('tasks.mark_task_complete', task_id=task.id) }}" class="btn-toggle" title="Marquer comme non terminée">↺</a>
-        {% else %}
-            <a href="{{ url_for('tasks.mark_task_complete', task_id=task.id) }}" class="btn-toggle" title="Marquer comme terminée">✓</a>
-        {% endif %}
-        <a href="{{ url_for('tasks.delete_task', task_id=task.id) }}" class="btn-delete" title="Supprimer">✕</a>
+        
+        <!-- Actions -->
+        <div class="flex space-x-2 ml-4">
+            <a href="{{ url_for('tasks.mark_task_complete', task_id=task.id) }}"
+               class="w-10 h-10 flex items-center justify-center rounded-lg transition
+                      {% if task.completed %}bg-orange-500 hover:bg-orange-600{% else %}bg-green-500 hover:bg-green-600{% endif %}
+                      text-white shadow-md hover:shadow-lg transform hover:scale-110"
+               title="{% if task.completed %}Marquer comme non terminée{% else %}Marquer comme terminée{% endif %}">
+                <i class="fas {% if task.completed %}fa-undo{% else %}fa-check{% endif %}"></i>
+            </a>
+            
+            <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}"
+               class="w-10 h-10 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-110"
+               title="Modifier">
+                <i class="fas fa-edit"></i>
+            </a>
+            
+            <a href="{{ url_for('tasks.delete_task', task_id=task.id) }}"
+               onclick="return confirm('Supprimer cette tâche ?')"
+               class="w-10 h-10 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-110"
+               title="Supprimer">
+                <i class="fas fa-trash"></i>
+            </a>
+        </div>
     </div>
 </div>
 {% endmacro %}
