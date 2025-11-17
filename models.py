@@ -22,6 +22,7 @@ class Task(db.Model):
     due_date = db.Column(db.DateTime, nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
     category = db.relationship("Category", backref="tasks")
+    priority = db.Column(db.Integer, nullable=True)
 
     def __repr__(self):
         return f'<Task {self.title}>'

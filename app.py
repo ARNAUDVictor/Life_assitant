@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for
 from models import db
 from config import Config
 from blueprints.tasks import tasks_bp
+from flask_migrate import Migrate
 
 # App creation
 app = Flask(__name__)
@@ -11,6 +12,9 @@ app.config.from_object(Config)
 
 # Initialize the database
 db.init_app(app)
+
+# Initialize Flask-Migrate
+migrate = Migrate(app, db)
 
 # Créer les tables automatiquement
 with app.app_context():
