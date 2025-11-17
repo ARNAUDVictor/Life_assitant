@@ -16,10 +16,6 @@ db.init_app(app)
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
-# Créer les tables automatiquement
-with app.app_context():
-    db.create_all()
-
 # Register blueprints
 app.register_blueprint(tasks_bp)
 
