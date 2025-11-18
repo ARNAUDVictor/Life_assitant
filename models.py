@@ -1,18 +1,22 @@
 from datetime import datetime
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 
 
 db = SQLAlchemy()
-
-
-class user(db.Model):
-    id = db.Column(db.Interger, primary_ket=True)
+ 
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
     pseudo = db.Column(db.String(30), nullable=False, unique=True)
-    password = db.column(db.String(100), nullable=False)
-    email = db.column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False, unique=True)
 
+    def __repr__(self):
+        return f"<User {self.pseudo}>"
+    
 
 class Category(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     color = db.Column(db.String(7), default="#667eea")
@@ -30,6 +34,8 @@ class Task(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
     category = db.relationship("Category", backref="tasks")
     priority = db.Column(db.Integer, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user = db.relationship("User", backref="tasks")
 
     def __repr__(self):
         return f'<Task {self.title}>'
