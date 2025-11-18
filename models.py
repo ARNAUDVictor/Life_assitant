@@ -5,6 +5,13 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
+class user(db.Model):
+    id = db.Column(db.Interger, primary_ket=True)
+    pseudo = db.Column(db.String(30), nullable=False, unique=True)
+    password = db.column(db.String(100), nullable=False)
+    email = db.column(db.String(100), nullable=False, unique=True)
+
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
