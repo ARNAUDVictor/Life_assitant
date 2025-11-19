@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for
-from models import db
+from flask_login import LoginManager
+from models import User, db
 from config import Config
 from blueprints.tasks import tasks_bp
 from flask_migrate import Migrate
@@ -18,6 +19,18 @@ migrate = Migrate(app, db)
 
 # Register blueprints
 app.register_blueprint(tasks_bp)
+
+
+# Initialize Flask-Login
+login_manager = LoginManager(app)
+# Set the login view for unauthorized users
+login_manager.login_view = "auth.login"
+
+# User loader function for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 # Route d'accueil (redirige vers /tasks/)
 @app.route('/')
