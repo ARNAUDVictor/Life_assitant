@@ -11,8 +11,31 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 # Login page
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    pass
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
 
+        if not email or "@" not in email:
+            flash("L'email n'est pas valide", "error")
+            return redirect(url_for("auth.login"))
+        if not password:
+            flash("Veuillez entrez votre mot de passe.", "error")
+            return redirect(url_for("auth.login"))
+        
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash("Email ou mot de passe incorrect", "error")
+            return redirect(url_for("auth.login"))
+        if not check_password_hash(user.password, password):
+            flash("Email ou mot de passe incorrect", "error")
+            return redirect(url_for("auth.login"))
+ 
+        login_user(user)
+        flash(f"Connexion réussie, bienvenue {user.pseudo} !", "success")
+        return redirect(url_for("tasks.home"))
+
+    # request method GET    
+    return render_template("auth/login.html")
 
 # registration page
 @auth_bp.route("/register", methods=["GET", "POST"])
