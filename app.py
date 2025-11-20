@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from models import User, db
 from config import Config
 from blueprints.tasks import tasks_bp
+from blueprints.auth import auth_bp
 from flask_migrate import Migrate
 
 # App creation
@@ -19,6 +20,7 @@ migrate = Migrate(app, db)
 
 # Register blueprints
 app.register_blueprint(tasks_bp)
+app.register_blueprint(auth_bp)
 
 
 # Initialize Flask-Login
