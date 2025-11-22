@@ -1,6 +1,6 @@
 import re
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import login_user, logout_user
+from flask_login import login_required, login_user, logout_user
 from sqlalchemy import exists
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, db
@@ -72,6 +72,7 @@ def register():
 
 # logout method
 @auth_bp.route("/logout")
+@login_required
 def logout():
     logout_user()
     flash("Vous avez été déconnecté.", "success")

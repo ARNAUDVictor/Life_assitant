@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required
 from models import Category, Task, db
 
 
@@ -7,6 +8,7 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 # Home page - display all tasks
 @tasks_bp.route('/')
+@login_required
 def home():
     sort_by = request.args.get('sort_by', 'due_date')
     categories_filter = request.args.get('category', None)
@@ -24,6 +26,7 @@ def home():
 
 # Add a new task
 @tasks_bp.route("/add_task", methods=['POST'])
+@login_required
 def add_task():
     task_title = request.form.get('title', "").strip()
     due_date_str = request.form.get('due_date', "")
@@ -56,6 +59,7 @@ def add_task():
 
 # Mark a task as complete
 @tasks_bp.route("/mark_task_complete/<int:task_id>")
+@login_required
 def mark_task_complete(task_id):
     task = Task.query.get(task_id)
     if task:
@@ -68,6 +72,7 @@ def mark_task_complete(task_id):
 
 # Delete a task
 @tasks_bp.route("/delete_task/<int:task_id>")
+@login_required
 def delete_task(task_id):
     task = Task.query.get(task_id)
     if task:
@@ -80,6 +85,7 @@ def delete_task(task_id):
 
 # Edit a task
 @tasks_bp.route("/edit_task/<int:task_id>", methods=['GET', 'POST'])
+@login_required
 def edit_task(task_id):
     task = Task.query.get_or_404(task_id)
 
@@ -119,6 +125,7 @@ def edit_task(task_id):
 
 # Categories home page
 @tasks_bp.route("/categories")
+@login_required
 def categories():
     categories = Category.query.all()
 
@@ -127,6 +134,7 @@ def categories():
 
 # Add a category
 @tasks_bp.route("/add_category", methods=['POST'])
+@login_required
 def add_category():
     name = request.form.get("name", "").strip()
     color = request.form.get("color", "")
@@ -145,6 +153,7 @@ def add_category():
 
 # Delete a category
 @tasks_bp.route("/delete_category/<int:category_id>")
+@login_required
 def delete_category(category_id):
     category = Category.query.get(category_id)
     if category:
