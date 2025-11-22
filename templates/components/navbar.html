@@ -7,7 +7,7 @@
                 <span>Mon App</span>
             </a>
             
-            <!-- Menu -->
+            <!-- Menu central -->
             <ul class="flex space-x-8">
                 <li>
                     <a href="{{ url_for('tasks.home') }}" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition font-medium">
@@ -34,6 +34,38 @@
                     </a>
                 </li>
             </ul>
+
+            <!-- Menu utilisateur -->
+            <div class="flex items-center space-x-4">
+                {% if current_user.is_authenticated %}
+                    <!-- Utilisateur connecté -->
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-700 font-medium">
+                            <i class="fas fa-user-circle text-primary mr-2"></i>
+                            {{ current_user.pseudo }}
+                        </span>
+                        <a href="{{ url_for('auth.logout') }}" 
+                           class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition shadow hover:shadow-lg">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Déconnexion
+                        </a>
+                    </div>
+                {% else %}
+                    <!-- Utilisateur non connecté -->
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ url_for('auth.login') }}" 
+                           class="px-4 py-2 text-primary hover:text-secondary font-medium transition">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Connexion
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" 
+                           class="px-4 py-2 bg-primary hover:bg-secondary text-white font-medium rounded-lg transition shadow hover:shadow-lg">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Inscription
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </nav>
