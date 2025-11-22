@@ -20,7 +20,7 @@ def home():
     else:
         task_list = Task.query.filter_by(user_id=current_user.id).order_by(getattr(Task, sort_by).desc()).all()
 
-    categories = Category.query.all()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template('tasks/index.html', tasks=task_list, categories=categories, datetime=datetime)
 
 
