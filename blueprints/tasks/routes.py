@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import current_user, login_required
 from models import Category, Task, db
 
 
@@ -16,9 +16,9 @@ def home():
     if categories_filter:
         categories_filter = int(categories_filter)
         
-        task_list = Task.query.filter_by(category_id=categories_filter).order_by(getattr(Task, sort_by).desc()).all()
+        task_list = Task.query.filter_by(category_id=categories_filter, user_id=current_user.id).order_by(getattr(Task, sort_by).desc()).all()
     else:
-        task_list = Task.query.order_by(getattr(Task, sort_by).desc()).all()
+        task_list = Task.query.filter_by(user_id=current_user.id).order_by(getattr(Task, sort_by).desc()).all()
 
     categories = Category.query.all()
     return render_template('tasks/index.html', tasks=task_list, categories=categories, datetime=datetime)
@@ -49,7 +49,11 @@ def add_task():
         except ValueError:
             category_id = None
 
-    task = Task(title=task_title, due_date=due_date, category_id=category_id)
+    task = Task(title=task_title, 
+                due_date=due_date, 
+                category_id=category_id, 
+                user_id=current_user.id)
+    
     db.session.add(task)
     db.session.commit()
     flash("Tache ajouté avec succès !", "success")
@@ -62,7 +66,7 @@ def add_task():
 @login_required
 def mark_task_complete(task_id):
     task = Task.query.get(task_id)
-    if task:
+    if task and task.user_id == current_user.id:
         task.completed = not task.completed
         db.session.commit()
         flash("Tache mise à jour !", "success")
@@ -75,7 +79,7 @@ def mark_task_complete(task_id):
 @login_required
 def delete_task(task_id):
     task = Task.query.get(task_id)
-    if task:
+    if task and task.user_id == current_user.id:
         db.session.delete(task)
         db.session.commit()
         flash("Tache supprimée avec succès !", "success")
@@ -88,7 +92,9 @@ def delete_task(task_id):
 @login_required
 def edit_task(task_id):
     task = Task.query.get_or_404(task_id)
-
+    if task.user_id != current_user.id:
+        return redirect(url_for("tasks.home"))
+    
     if request.method == 'POST':
         task_title = request.form.get('title', "").strip()
         due_date_str = request.form.get('due_date', "")
@@ -99,7 +105,7 @@ def edit_task(task_id):
             for error in errors:
                 flash(error, "error")
             return redirect(url_for("tasks.edit_task", task_id=task.id))
-        
+            
         due_date = None
         if due_date_str:
             due_date = datetime.fromisoformat(due_date_str)
@@ -119,7 +125,7 @@ def edit_task(task_id):
         return redirect(url_for("tasks.home"))
     
     # GET : afficher le formulaire
-    categories = Category.query.all()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template('tasks/edit.html', task=task, categories=categories, datetime=datetime)
 
 
@@ -127,7 +133,7 @@ def edit_task(task_id):
 @tasks_bp.route("/categories")
 @login_required
 def categories():
-    categories = Category.query.all()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
 
     return render_template("tasks/categories.html", categories=categories)
 
@@ -143,7 +149,7 @@ def add_category():
         flash("Le nom ne peut etre vide ou supérieure à 20 caractères.", "error")
         return(url_for("tasks.categories"))
     
-    category = Category(name=name, color=color)
+    category = Category(name=name, color=color, user_id=current_user.id)
     db.session.add(category)
     db.session.commit()
     flash("Catégorie ajoutée avec succès !", "success")
@@ -156,7 +162,7 @@ def add_category():
 @login_required
 def delete_category(category_id):
     category = Category.query.get(category_id)
-    if category:
+    if category and category.user_id == current_user.id:
         db.session.delete(category)
         db.session.commit()
         flash("Category supprimée avec succès !", "success")

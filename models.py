@@ -42,6 +42,8 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     color = db.Column(db.String(7), default="#667eea")
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user = db.relationship("User", backref="categories")
 
     def __repr__(self):
         return f"<Category {self.name}>"
