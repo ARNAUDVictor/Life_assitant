@@ -60,6 +60,11 @@ class Task(db.Model):
     priority = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     user = db.relationship("User", backref="tasks")
+    parent_id = db.Column(db.Integer, db.ForeignKey("task.id", ondelete="CASCADE", name="fk_task_parent"), nullable=True)
+    subtasks = db.relationship('Task',
+                                backref=db.backref('parent', remote_side='Task.id'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Task {self.title}>'
@@ -72,6 +77,7 @@ class Task(db.Model):
         return datetime.now() > self.due_date
     
 
+    # validates task input
     @staticmethod
     def validate_input(title, due_date_str):
         errors = []
@@ -87,4 +93,20 @@ class Task(db.Model):
                 errors.append("Format de date invalide.")
 
         return errors
-        
+    
+
+    # returns the level of the task in the hierarchy
+    def get_level(self):
+
+        level = 0
+        current = self
+        while current.parent:
+            level += 1
+            current = current.parent
+        return level
+
+
+    # checks if the task can have subtasks (max 2 levels)
+    def can_have_subtasks(self):
+        return self.get_level() < 2
+            
