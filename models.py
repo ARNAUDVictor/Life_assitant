@@ -79,7 +79,7 @@ class Task(db.Model):
 
     # validates task input
     @staticmethod
-    def validate_input(title, due_date_str):
+    def validate_input(title, due_date_str,):
         errors = []
         if not title or len(title) > 200:
             errors.append("Le titre d'une tache ne peut etre vide ou plus long que 200 caractères")
@@ -93,6 +93,24 @@ class Task(db.Model):
                 errors.append("Format de date invalide.")
 
         return errors
+    
+    @staticmethod
+    def process_input(due_date_str, category_id_str):
+        data = {}
+        due_date = None
+        if due_date_str:
+             due_date = datetime.fromisoformat(due_date_str)
+        data["due_date"] = due_date
+
+        category_id = None
+        if category_id_str:
+            try:
+                category_id = int(category_id_str)
+            except ValueError:
+                category_id = None
+        data["category_id"] = category_id
+
+        return data
     
 
     # returns the level of the task in the hierarchy

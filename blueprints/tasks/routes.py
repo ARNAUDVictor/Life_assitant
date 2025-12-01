@@ -24,6 +24,8 @@ def home():
     return render_template('tasks/index.html', tasks=task_list, categories=categories, datetime=datetime)
 
 
+################################### TASKS
+
 # Add a new task
 @tasks_bp.route("/add_task", methods=['POST'])
 @login_required
@@ -38,20 +40,11 @@ def add_task():
             flash(error, "error")
         return redirect(url_for("tasks.home"))
     
-    due_date = None
-    if due_date_str:
-        due_date = datetime.fromisoformat(due_date_str)
-
-    category_id = None
-    if category_id_str:
-        try:
-            category_id = int(category_id_str)
-        except ValueError:
-            category_id = None
-
+    processed_data = Task.process_input(due_date_str, category_id_str)
+    print("processed_data : ", processed_data)
     task = Task(title=task_title, 
-                due_date=due_date, 
-                category_id=category_id, 
+                due_date=processed_data["due_date"], 
+                category_id=processed_data["category_id"], 
                 user_id=current_user.id)
     
     db.session.add(task)
@@ -106,20 +99,11 @@ def edit_task(task_id):
                 flash(error, "error")
             return redirect(url_for("tasks.edit_task", task_id=task.id))
             
-        due_date = None
-        if due_date_str:
-            due_date = datetime.fromisoformat(due_date_str)
-
-        category_id = None
-        if category_id_str:
-            try:
-                category_id = int(category_id_str)
-            except ValueError:
-                category_id = None
+        processed_data = Task.process_input(due_date_str, category_id_str)
 
         task.title = task_title
-        task.due_date = due_date
-        task.category_id = category_id
+        task.due_date = processed_data["due_date"]
+        task.category_id = processed_data["category_id"]
         db.session.commit()
         flash("Tache mise à jour avec succès !", "success")
         return redirect(url_for("tasks.home"))
@@ -128,6 +112,26 @@ def edit_task(task_id):
     categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template('tasks/edit.html', task=task, categories=categories, datetime=datetime)
 
+
+#####################################   Sub-task
+
+# Add a sub-task
+@tasks_bp.route("/add_subtask/<int:task_id>", methods=["POST"])
+@login_required
+def add_subtask(task_id):
+    parent_task = Task.query.filter_by(id=task_id).first()
+    if parent_task.user_id == current_user.id:
+        if parent_task.can_have_subtasks():
+            task_title = request.form.get('title', "").strip()
+            due_date_str = request.form.get('due_date', "")
+            category_id_str = request.form.get("category_id", "")
+            errors = Task.validate_input(task_title, due_date_str)
+
+            #if errors:
+
+            #subtask = Task(title = task_title, due)
+
+#####################################   Category
 
 # Categories home page
 @tasks_bp.route("/categories")
