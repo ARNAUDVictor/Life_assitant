@@ -40,7 +40,7 @@ def add_task():
             flash(error, "error")
         return redirect(url_for("tasks.home"))
     
-    processed_data = Task.process_input(due_date_str, category_id_str)
+    processed_data = Task.parse_form_data(due_date_str, category_id_str)
     print("processed_data : ", processed_data)
     task = Task(title=task_title, 
                 due_date=processed_data["due_date"], 
@@ -99,7 +99,7 @@ def edit_task(task_id):
                 flash(error, "error")
             return redirect(url_for("tasks.edit_task", task_id=task.id))
             
-        processed_data = Task.process_input(due_date_str, category_id_str)
+        processed_data = Task.parse_form_data(due_date_str, category_id_str)
 
         task.title = task_title
         task.due_date = processed_data["due_date"]
@@ -119,17 +119,38 @@ def edit_task(task_id):
 @tasks_bp.route("/add_subtask/<int:task_id>", methods=["POST"])
 @login_required
 def add_subtask(task_id):
-    parent_task = Task.query.filter_by(id=task_id).first()
-    if parent_task.user_id == current_user.id:
-        if parent_task.can_have_subtasks():
-            task_title = request.form.get('title', "").strip()
-            due_date_str = request.form.get('due_date', "")
-            category_id_str = request.form.get("category_id", "")
-            errors = Task.validate_input(task_title, due_date_str)
+    parent_task = Task.query.get_or_404(task_id)
+    if parent_task.user_id != current_user.id:
+        return redirect(url_for("tasks.home"))
+    
+    if not parent_task.can_have_subtasks():
+        flash("Cette tache ne peut pas avoir du sous-taches", "error")
+        return redirect(url_for("tasks.home"))
+    
+    task_title = request.form.get('title', "").strip()
+    due_date_str = request.form.get('due_date', "")
+    category_id_str = request.form.get("category_id", "")
+    errors = Task.validate_input(task_title, due_date_str)
 
-            #if errors:
+    if errors:
+        for error in errors:
+            flash(error, "error")
+        return redirect(url_for("tasks.home"))
+            
+    processed_input = Task.parse_form_data(due_date_str, category_id_str)
 
-            #subtask = Task(title = task_title, due)
+    subtask = Task(title = task_title,
+                    due_date = processed_input["due_date"],
+                    category_id = processed_input["category_id"],
+                    parent_id = parent_task.id,
+                    user_id = current_user.id,
+                    )
+    
+    db.session.add(subtask)
+    db.session.commit()
+    flash("Sous-tâche ajoutée avec succès !", "success")
+    return redirect(url_for("tasks.home"))
+
 
 #####################################   Category
 

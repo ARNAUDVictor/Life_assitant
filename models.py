@@ -93,9 +93,10 @@ class Task(db.Model):
                 errors.append("Format de date invalide.")
 
         return errors
-    
+
+    # processes task input
     @staticmethod
-    def process_input(due_date_str, category_id_str):
+    def parse_form_data(due_date_str, category_id_str):
         data = {}
         due_date = None
         if due_date_str:
