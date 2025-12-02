@@ -16,9 +16,16 @@ def home():
     if categories_filter:
         categories_filter = int(categories_filter)
         
-        task_list = Task.query.filter_by(category_id=categories_filter, user_id=current_user.id).order_by(getattr(Task, sort_by).desc()).all()
+        task_list = Task.query.filter_by(
+            category_id=categories_filter, 
+            user_id=current_user.id,
+            parent_id=None  # ← Filtre les sous-tâches
+        ).order_by(getattr(Task, sort_by).desc()).all()
     else:
-        task_list = Task.query.filter_by(user_id=current_user.id).order_by(getattr(Task, sort_by).desc()).all()
+        task_list = Task.query.filter_by(
+            user_id=current_user.id,
+            parent_id=None  # ← Filtre les sous-tâches
+        ).order_by(getattr(Task, sort_by).desc()).all()
 
     categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template('tasks/index.html', tasks=task_list, categories=categories, datetime=datetime)

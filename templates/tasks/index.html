@@ -103,7 +103,7 @@
         {% if active_tasks %}
             <div class="space-y-4">
                 {% for task in active_tasks %}
-                    {{ task_card(task) }}
+                    {{ task_card(task, categories) }}
                 {% endfor %}
             </div>
         {% else %}
@@ -126,7 +126,7 @@
         {% if completed_tasks %}
             <div class="space-y-4">
                 {% for task in completed_tasks %}
-                    {{ task_card(task) }}
+                    {{ task_card(task, categories) }}
                 {% endfor %}
             </div>
         {% else %}
