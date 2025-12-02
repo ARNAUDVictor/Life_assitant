@@ -15,6 +15,11 @@
                         {{ task.category.name }}
                     </span>
                 {% endif %}
+                {% if task.get_level() == 1 %}
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Sous-tâche</span>
+                {% elif task.get_level() == 2 %}
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Sous-sous-tâche</span>
+                {% endif %}
             </div>
             
             <div class="flex flex-col space-y-1 text-sm text-gray-600">
@@ -34,8 +39,8 @@
                 {% endif %}
             </div>
             
-            <!-- Sous-tâches (avec spoiler) -->
-            {% if task.parent_id is none and task.can_have_subtasks() %}
+            <!-- Sous-tâches (récursif pour niveaux 0 et 1) -->
+            {% if task.can_have_subtasks() %}
                 {% set all_subtasks = task.subtasks.all() %}
                 
                 <!-- Bouton pour afficher/cacher les sous-tâches -->
@@ -46,13 +51,17 @@
                             <i id="icon-subtasks-{{ task.id }}" class="fas fa-chevron-right transition-transform"></i>
                             <span>
                                 <i class="fas fa-list-ul mr-1"></i>
-                                Sous-tâches
+                                {% if task.get_level() == 0 %}
+                                    Sous-tâches
+                                {% else %}
+                                    Sous-sous-tâches
+                                {% endif %}
                             </span>
                             {% set completed_count = all_subtasks|selectattr('completed')|list|length %}
                             <span class="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
                                 {{ completed_count }}/{{ all_subtasks|length }}
                             </span>
-                            <!-- Mini barre de progression dans le bouton -->
+                            <!-- Mini barre de progression -->
                             {% set progress = (completed_count / all_subtasks|length * 100)|int %}
                             <div class="w-16 bg-gray-200 rounded-full h-1.5">
                                 <div class="bg-green-500 h-1.5 rounded-full transition-all" style="width: {{ progress }}%"></div>
@@ -69,49 +78,132 @@
                         </div>
                         
                         <!-- Liste des sous-tâches -->
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             {% for subtask in all_subtasks %}
-                                <div class="flex items-start space-x-2 ml-4">
-                                    <!-- Checkbox -->
-                                    <a href="{{ url_for('tasks.mark_task_complete', task_id=subtask.id) }}"
-                                       class="mt-1 flex-shrink-0">
-                                        <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center hover:border-primary transition
-                                                    {% if subtask.completed %}bg-green-500 border-green-500{% endif %}">
-                                            {% if subtask.completed %}
-                                                <i class="fas fa-check text-white text-xs"></i>
-                                            {% endif %}
+                                <!-- Niveau 1 : Sous-tâches (avec possibilité de sous-sous-tâches) -->
+                                {% if subtask.get_level() == 1 %}
+                                    <div class="ml-4 p-3 bg-gray-50 rounded-lg">
+                                        <div class="flex items-start space-x-2">
+                                            <!-- Checkbox -->
+                                            <a href="{{ url_for('tasks.mark_task_complete', task_id=subtask.id) }}"
+                                               class="mt-1 flex-shrink-0">
+                                                <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center hover:border-primary transition
+                                                            {% if subtask.completed %}bg-green-500 border-green-500{% endif %}">
+                                                    {% if subtask.completed %}
+                                                        <i class="fas fa-check text-white text-xs"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+                                            
+                                            <!-- Contenu -->
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center space-x-2">
+                                                    <p class="text-sm font-medium {% if subtask.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">
+                                                        {{ subtask.title }}
+                                                    </p>
+                                                    {% if subtask.category %}
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold text-white"
+                                                              style="background-color: {{ subtask.category.color }}">
+                                                            {{ subtask.category.name }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if subtask.due_date %}
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        <i class="far fa-calendar-alt mr-1"></i>
+                                                        {{ subtask.due_date.strftime('%d/%m/%Y à %H:%M') }}
+                                                    </p>
+                                                {% endif %}
+                                                
+                                                <!-- Sous-sous-tâches (niveau 2) -->
+                                                {% set subsubtasks = subtask.subtasks.all() %}
+                                                {% if subsubtasks %}
+                                                    <div class="mt-2 space-y-1">
+                                                        {% for subsubtask in subsubtasks %}
+                                                            <div class="flex items-center space-x-2 ml-4">
+                                                                <a href="{{ url_for('tasks.mark_task_complete', task_id=subsubtask.id) }}"
+                                                                   class="flex-shrink-0">
+                                                                    <div class="w-4 h-4 border-2 border-gray-300 rounded flex items-center justify-center hover:border-primary transition
+                                                                                {% if subsubtask.completed %}bg-green-500 border-green-500{% endif %}">
+                                                                        {% if subsubtask.completed %}
+                                                                            <i class="fas fa-check text-white" style="font-size: 8px;"></i>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </a>
+                                                                <p class="text-xs flex-1 {% if subsubtask.completed %}line-through text-gray-400{% else %}text-gray-600{% endif %}">
+                                                                    {{ subsubtask.title }}
+                                                                </p>
+                                                                <a href="{{ url_for('tasks.delete_task', task_id=subsubtask.id) }}"
+                                                                   onclick="return confirm('Supprimer ?')"
+                                                                   class="text-red-400 hover:text-red-600 text-xs">
+                                                                    <i class="fas fa-times"></i>
+                                                                </a>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Bouton ajouter sous-sous-tâche (niveau 2) -->
+                                                {% if subtask.can_have_subtasks() %}
+                                                    <button onclick="toggleSubtaskForm{{ subtask.id }}()" 
+                                                            class="mt-2 text-xs text-primary hover:text-secondary font-medium transition">
+                                                        <i class="fas fa-plus-circle mr-1"></i>
+                                                        Ajouter une sous-sous-tâche
+                                                    </button>
+                                                    
+                                                    <div id="subtask-form-{{ subtask.id }}" class="hidden mt-2 p-2 bg-white rounded">
+                                                        <form method="POST" action="{{ url_for('tasks.add_subtask', task_id=subtask.id) }}" class="space-y-1">
+                                                            <input type="text" name="title" placeholder="Titre..." required maxlength="200"
+                                                                   class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                                                            <div class="flex space-x-1">
+                                                                <button type="submit" class="px-2 py-1 bg-primary text-white text-xs rounded">
+                                                                    Ajouter
+                                                                </button>
+                                                                <button type="button" onclick="toggleSubtaskForm{{ subtask.id }}()"
+                                                                        class="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded">
+                                                                    Annuler
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    
+                                                    <script>
+                                                        function toggleSubtaskForm{{ subtask.id }}() {
+                                                            document.getElementById('subtask-form-{{ subtask.id }}').classList.toggle('hidden');
+                                                        }
+                                                    </script>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Bouton supprimer sous-tâche -->
+                                            <a href="{{ url_for('tasks.delete_task', task_id=subtask.id) }}"
+                                               onclick="return confirm('Supprimer cette sous-tâche ?')"
+                                               class="text-red-500 hover:text-red-700 transition flex-shrink-0">
+                                                <i class="fas fa-times text-sm"></i>
+                                            </a>
                                         </div>
-                                    </a>
-                                    
-                                    <!-- Contenu sous-tâche -->
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center space-x-2">
-                                            <p class="text-sm {% if subtask.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">
-                                                {{ subtask.title }}
-                                            </p>
-                                            {% if subtask.category %}
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold text-white"
-                                                      style="background-color: {{ subtask.category.color }}">
-                                                    {{ subtask.category.name }}
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                        {% if subtask.due_date %}
-                                            <p class="text-xs text-gray-500 mt-1">
-                                                <i class="far fa-calendar-alt mr-1"></i>
-                                                {{ subtask.due_date.strftime('%d/%m/%Y à %H:%M') }}
-                                            </p>
-                                        {% endif %}
                                     </div>
-                                    
-                                    <!-- Bouton supprimer -->
-                                    <a href="{{ url_for('tasks.delete_task', task_id=subtask.id) }}"
-                                       onclick="return confirm('Supprimer cette sous-tâche ?')"
-                                       class="text-red-500 hover:text-red-700 transition flex-shrink-0"
-                                       title="Supprimer">
-                                        <i class="fas fa-times text-sm"></i>
-                                    </a>
-                                </div>
+                                {% else %}
+                                    <!-- Niveau 2 : Affichage simple (pas de sous-niveaux) -->
+                                    <div class="flex items-center space-x-2 ml-4">
+                                        <a href="{{ url_for('tasks.mark_task_complete', task_id=subtask.id) }}">
+                                            <div class="w-4 h-4 border-2 border-gray-300 rounded flex items-center justify-center
+                                                        {% if subtask.completed %}bg-green-500 border-green-500{% endif %}">
+                                                {% if subtask.completed %}
+                                                    <i class="fas fa-check text-white" style="font-size: 8px;"></i>
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                        <p class="text-xs flex-1 {% if subtask.completed %}line-through text-gray-400{% else %}text-gray-600{% endif %}">
+                                            {{ subtask.title }}
+                                        </p>
+                                        <a href="{{ url_for('tasks.delete_task', task_id=subtask.id) }}"
+                                           onclick="return confirm('Supprimer ?')"
+                                           class="text-red-400 hover:text-red-600 text-xs">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -126,52 +218,40 @@
                     </script>
                 {% endif %}
                 
-                <!-- Bouton pour ajouter une sous-tâche (toujours visible) -->
+                <!-- Bouton pour ajouter une sous-tâche (niveau 1) -->
                 <div class="mt-3">
                     <button onclick="toggleSubtaskForm{{ task.id }}()" 
                             class="text-sm text-primary hover:text-secondary font-medium transition">
                         <i class="fas fa-plus-circle mr-1"></i>
-                        Ajouter une sous-tâche
+                        Ajouter une {% if task.get_level() == 0 %}sous-tâche{% else %}sous-sous-tâche{% endif %}
                     </button>
                     
-                    <!-- Formulaire d'ajout (caché par défaut) -->
+                    <!-- Formulaire d'ajout -->
                     <div id="subtask-form-{{ task.id }}" class="hidden mt-3 p-3 bg-gray-50 rounded-lg">
                         <form method="POST" action="{{ url_for('tasks.add_subtask', task_id=task.id) }}" class="space-y-2">
-                            <!-- Titre -->
-                            <input type="text" 
-                                   name="title" 
-                                   placeholder="Titre de la sous-tâche..." 
-                                   required 
-                                   maxlength="200"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
+                            <input type="text" name="title" placeholder="Titre..." required maxlength="200"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                             
-                            <!-- Date et Catégorie -->
-                            <div class="grid grid-cols-2 gap-2">
-                                <!-- Date d'échéance -->
-                                <input type="datetime-local" 
-                                       name="due_date"
-                                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-                                
-                                <!-- Catégorie -->
-                                <select name="category_id" 
-                                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-                                    <option value="">Sans catégorie</option>
-                                    {% for cat in categories %}
-                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                            {% if task.get_level() == 0 %}
+                                <!-- Formulaire complet pour sous-tâches niveau 1 -->
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="datetime-local" name="due_date"
+                                           class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <select name="category_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="">Sans catégorie</option>
+                                        {% for cat in categories %}
+                                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            {% endif %}
                             
-                            <!-- Boutons -->
                             <div class="flex space-x-2">
-                                <button type="submit" 
-                                        class="px-4 py-2 bg-primary hover:bg-secondary text-white text-sm font-medium rounded-lg transition">
-                                    <i class="fas fa-plus mr-1"></i>
-                                    Ajouter
+                                <button type="submit" class="px-4 py-2 bg-primary text-white text-sm rounded-lg">
+                                    <i class="fas fa-plus mr-1"></i>Ajouter
                                 </button>
-                                <button type="button" 
-                                        onclick="toggleSubtaskForm{{ task.id }}()"
-                                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition">
+                                <button type="button" onclick="toggleSubtaskForm{{ task.id }}()"
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg">
                                     Annuler
                                 </button>
                             </div>
@@ -180,8 +260,7 @@
                     
                     <script>
                         function toggleSubtaskForm{{ task.id }}() {
-                            const form = document.getElementById('subtask-form-{{ task.id }}');
-                            form.classList.toggle('hidden');
+                            document.getElementById('subtask-form-{{ task.id }}').classList.toggle('hidden');
                         }
                     </script>
                 </div>
