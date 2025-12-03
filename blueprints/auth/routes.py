@@ -57,9 +57,9 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-        except Exception:
+        except Exception as e:
             db.session.rollback()
-            flash("Erreur lors de la création du compte", "error")
+            flash(f"Erreur lors de la création du compte: {str(e)}", "error")
             return redirect(url_for("auth.register"))
         
         flash("Compte créé avec succès !", "success")
